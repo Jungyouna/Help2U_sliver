@@ -39,22 +39,24 @@
                 android:id="@+id/editText"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="249dp"
                 android:background="#FFFFFF"
                 android:hint="회원코드를 입력해주세요"
                 android:inputType="number"
                 android:padding="10dp" />
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/button5"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginBottom="200dp"
+                android:layout_marginBottom="153dp"
                 android:background="#3e3e927a"
-                android:textColor="#383e4e"
                 android:text="lOGIN"
+                android:textColor="#383e4e"
                 android:textSize="18dp" />
 
             <TextView
@@ -70,14 +72,17 @@
                 android:textSize="18dp" />
 
             <EditText
-                android:id="@+id/phoneNumber"
-                android:layout_width="wrap_content"
+                android:id="@+id/p_phoneNumber"
+                android:layout_width="250dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginBottom="132dp"
+                android:layout_marginBottom="216dp"
+                android:background="#FFFFFF"
                 android:ems="10"
-                android:inputType="phone" />
+                android:hint=" 보호자 핸드폰 번호 입력"
+                android:inputType="phone"
+                android:padding="10dp" />
 
         </RelativeLayout>
     </FrameLayout>
