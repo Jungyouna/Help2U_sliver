@@ -1,5 +1,6 @@
 package com.example.youna.mayii;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -8,10 +9,21 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.SmsManager;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.content.Intent;
 import android.widget.Toast;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -23,13 +35,17 @@ import java.util.UUID;
  * Created by user on 2018-05-23.
  */
 
-public class BlueToothActivity extends AppCompatActivity {
+public class dataActivity extends AppCompatActivity {
+
     // 사용자 정의 함수로 블루투스 활성 상태의 변경 결과를 App으로 알려줄때 식별자로 사용됨 (0보다 커야함)
     static final int REQUEST_ENABLE_BT = 10;
     int mPariedDeviceCount = 0;
     Set<BluetoothDevice> mDevices;
     // 폰의 블루투스 모듈을 사용하기 위한 오브젝트.
     BluetoothAdapter mBluetoothAdapter;
+    private String nickName;
+    private String tempString,phoneNo;
+    private int cnt;
     /**
      BluetoothDevice 로 기기의 장치정보를 알아낼 수 있는 자세한 메소드 및 상태값을 알아낼 수 있다.
      연결하고자 하는 다른 블루투스 기기의 이름, 주소, 연결 상태 등의 정보를 조회할 수 있는 클래스.
@@ -42,29 +58,42 @@ public class BlueToothActivity extends AppCompatActivity {
     InputStream mInputStream = null;
     String mStrDelimiter = "\n";
     char mCharDelimiter =  '\n';
-
-
-
+//=========================================
+private DatabaseReference testFirebase;
+    private DatabaseReference mDatabase;
+    private  String dataCode;
+//========================================
     Thread mWorkerThread = null;
     byte[] readBuffer;
     int readBufferPosition;
-
-
     EditText mEditReceive;
 
-
+    //========================================
+    private String name,sms;
+    private String help_message = "응급상황 입니다!";
+//========================================
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_data);
         setTitle("실시간 데이터");
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.SEND_SMS},1);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        testFirebase = FirebaseDatabase.getInstance().getReference();
 
+        Intent intent = getIntent();
+        dataCode=intent.getStringExtra("dataCode");
+        name = intent.getStringExtra("name");
+        checkCode(dataCode);
         mEditReceive = (EditText)findViewById(R.id.receiveString);
+
         // 블루투스 활성화 시키는 메소드
+
         checkBluetooth();
     }
+
 
     // 블루투스 장치의 이름이 주어졌을때 해당 블루투스 장치 객체를 페어링 된 장치 목록에서 찾아내는 코드.
     BluetoothDevice getDeviceFromBondedList(String name) {
@@ -154,7 +183,20 @@ public class BlueToothActivity extends AppCompatActivity {
                                         @Override
                                         public void run() {
                                             // mStrDelimiter = '\n';
-                                            mEditReceive.setText(mEditReceive.getText().toString() + data+ mStrDelimiter);
+                                            tempString="warning\r";
+
+                                            if(data.compareTo(tempString)==0) {
+                                                phoneNo = name;
+                                                mDatabase.child("User").child(nickName).child("위급상황").setValue(data);
+
+                                                sms=help_message;
+                                                SmsManager smsManager = SmsManager.getDefault();
+                                                smsManager.sendTextMessage(name, null, sms, null, null);
+                                                Toast.makeText(getApplicationContext(), "메세지 전송이 완료되었습니다", Toast.LENGTH_LONG).show();
+                                            }
+                                            else
+                                                mDatabase.child("User").child(nickName).child("심장박동").setValue(data);
+
                                         }
 
                                     });
@@ -300,4 +342,39 @@ public class BlueToothActivity extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+
+    public void checkCode(final String abc){
+        testFirebase.child("User").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    // Log.d("[Test]", "ValueEventListener : " + snapshot.getValue());
+
+                    if(snapshot.child("이메일").getValue()==null) {
+                        return;
+                    }
+                    String test2 =snapshot.child("회원 코드").getValue().toString();
+
+                    if(test2.equals(abc)==true) {
+                        nickName=snapshot.child("닉네임").getValue().toString();
+                        break;
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+
+
+
+
+
 }

@@ -93,6 +93,14 @@
                 android:textSize="18dp"
                 android:textStyle="bold" />
 
+            <ImageButton
+                android:id="@+id/sendButton"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_alignTop="@+id/imageView4"
+                android:layout_toEndOf="@+id/textView5"
+                app:srcCompat="@drawable/send" />
+
         </RelativeLayout>
     </FrameLayout>
 </android.support.constraint.ConstraintLayout>

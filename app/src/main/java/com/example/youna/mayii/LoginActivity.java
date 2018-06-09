@@ -79,7 +79,7 @@ public class LoginActivity extends AppCompatActivity {
 
                     if(test2.equals(abc)==true) {
                         Intent intent = new Intent(LoginActivity.this, SilverActivity.class);
-                        intent.putExtra("name", p_phoneNumber.getText().toString());
+                        intent.putExtra("name", p_phoneNumber.getText().toString()).putExtra("dataCode",test2);
                         startActivity(intent);
                         dataCnt=0;
                         break;

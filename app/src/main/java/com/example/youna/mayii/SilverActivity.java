@@ -4,8 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -14,22 +17,52 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import org.w3c.dom.Text;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class SilverActivity extends AppCompatActivity {
     private Button button;
     private String help_message = "응급상황 입니다!";
     private TextView textView3;
     private TextView textView6;
+    private ImageButton sendButton;
     private String name, phoneNo, sms;
+    private String dataCode;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +71,10 @@ public class SilverActivity extends AppCompatActivity {
         button = (Button)findViewById(R.id.button);
         Intent intent = getIntent();
         name = intent.getStringExtra("name");
+        dataCode=intent.getStringExtra("dataCode");
         textView3 = (TextView)findViewById(R.id.textView3);
         textView6 = (TextView)findViewById(R.id.textView6);
+        sendButton=(ImageButton)findViewById(R.id.sendButton);
         textView3.setText(name);
         textView6.setText(help_message);
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.SEND_SMS},1);
@@ -62,5 +97,26 @@ public class SilverActivity extends AppCompatActivity {
 
             }
         });
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(SilverActivity.this, dataActivity.class);
+                i.putExtra("dataCode",dataCode).putExtra("name",name);
+                startActivity(i);
+            }
+        });
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
