@@ -17,16 +17,25 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LoginActivity extends AppCompatActivity {
     private Button button5;
     private EditText p_phoneNumber;
     private EditText codeNumber;
     private int dataCnt;
     private DatabaseReference testFirebase;
+    public List emailList;
+    public List nickList;
+    public List codeList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        emailList=new ArrayList();
+        nickList=new ArrayList();
+        codeList=new ArrayList();
         p_phoneNumber = (EditText)findViewById(R.id.p_phoneNumber);
         codeNumber = (EditText)findViewById(R.id.editText);
         testFirebase = FirebaseDatabase.getInstance().getReference();
@@ -61,13 +70,36 @@ public class LoginActivity extends AppCompatActivity {
         AlertDialog alert = alert_ex.create();
         alert.show();
     }
+    public void copyFirebase()
+    {
+        emailList.clear();
+        testFirebase.child("User").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("@@@@@@@@", "!!!");
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    if(snapshot.child("이메일").getValue()==null)
+                        break;
+                    emailList.add(snapshot.child("이메일").getValue().toString());
+                    if(snapshot.child("닉네임").getValue()==null)
+                        break;
+                    nickList.add(snapshot.child("닉네임").getValue().toString());
+                    if(snapshot.child("회원 코드").getValue()==null)
+                        break;
+                    codeList.add(snapshot.child("회원 코드").getValue().toString());
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
 
 
     public void checkCode(final String abc){
         testFirebase.child("User").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                dataCnt=0;
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     // Log.d("[Test]", "ValueEventListener : " + snapshot.getValue());
 
@@ -97,4 +129,5 @@ public class LoginActivity extends AppCompatActivity {
         });
 
     }
+
 }

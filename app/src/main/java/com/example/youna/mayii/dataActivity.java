@@ -1,21 +1,26 @@
 package com.example.youna.mayii;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.content.Intent;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -72,6 +77,18 @@ private DatabaseReference testFirebase;
     private String name,sms;
     private String help_message = "응급상황 입니다!";
 //========================================
+private Button btnShowLocation;
+    private String txtLat;
+    private String txtLon;
+    private final int PERMISSIONS_ACCESS_FINE_LOCATION = 1000;
+    private final int PERMISSIONS_ACCESS_COARSE_LOCATION = 1001;
+    private boolean isAccessFineLocation = false;
+    private boolean isAccessCoarseLocation = false;
+    private boolean isPermission = false;
+
+    // GPSTracker class
+    private GpsInfo gps;
+
 
 
     @Override
@@ -90,8 +107,14 @@ private DatabaseReference testFirebase;
         mEditReceive = (EditText)findViewById(R.id.receiveString);
 
         // 블루투스 활성화 시키는 메소드
+        Intent intent2=new Intent();
+        intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         checkBluetooth();
+
+
+
     }
 
 
@@ -184,7 +207,7 @@ private DatabaseReference testFirebase;
                                         public void run() {
                                             // mStrDelimiter = '\n';
                                             tempString="warning\r";
-
+                                            Log.d("@@@@@@@@","###");
                                             if(data.compareTo(tempString)==0) {
                                                 phoneNo = name;
                                                 mDatabase.child("User").child(nickName).child("위급상황").setValue(data);
@@ -196,7 +219,27 @@ private DatabaseReference testFirebase;
                                             }
                                             else
                                                 mDatabase.child("User").child(nickName).child("심장박동").setValue(data);
+                                            gps = new GpsInfo(dataActivity.this);
+                                            // GPS 사용유무 가져오기
+                                            callPermission();  // 권한 요청을 해야 함
+                                            if (gps.isGetLocation()) {
 
+                                                double latitude = gps.getLatitude();
+                                                double longitude = gps.getLongitude();
+
+                                                txtLat=Double.toString(latitude);
+                                                txtLon=Double.toString(longitude);
+                                                mDatabase.child("User").child(nickName).child("위도").setValue(txtLat);
+                                                mDatabase.child("User").child(nickName).child("경도").setValue(txtLon);
+
+                                            } else {
+                                                // GPS 를 사용할수 없으므로
+                                                gps.showSettingsAlert();
+                                            }
+                                            /*
+                                            Intent i = new Intent(dataActivity.this, GpsActivity.class);
+                                            startActivity(i);
+                                            */
                                         }
 
                                     });
@@ -373,7 +416,54 @@ private DatabaseReference testFirebase;
     }
 
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
 
+        boolean fineLocationRationale = ActivityCompat
+                .shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION);
+        int hasFineLocationPermission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+
+        if (hasFineLocationPermission == PackageManager
+                .PERMISSION_DENIED && fineLocationRationale);
+
+
+        else if (hasFineLocationPermission
+                == PackageManager.PERMISSION_DENIED && !fineLocationRationale) {
+
+        } else if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED) {
+
+
+            Log.d("!!!", "checkPermissions : 퍼미션 가지고 있음");
+
+
+        }
+    }
+
+    // 전화번호 권한 요청
+    private void callPermission() {
+        // Check the SDK version and whether the permission is already granted or not.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_ACCESS_FINE_LOCATION);
+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
+
+            requestPermissions(
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    PERMISSIONS_ACCESS_COARSE_LOCATION);
+        } else {
+            isPermission = true;
+        }
+    }
 
 
 
