@@ -59,11 +59,11 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginBottom="109dp"
-                android:textSize="20dp"
-                android:textStyle="bold"
+                android:layout_marginBottom="110dp"
+                android:text="데이터 전송중입니다..."
                 android:textColor="#FFFFFF"
-                android:text="데이터 전송중입니다..." />
+                android:textSize="20dp"
+                android:textStyle="bold" />
 
         </RelativeLayout>
 

@@ -106,7 +106,26 @@ public class SilverActivity extends AppCompatActivity {
             }
         });
     }
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder alert_ex = new AlertDialog.Builder(this);
+        alert_ex.setMessage("헬프투유를 종료하시겠습니까?");
 
+        alert_ex.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        alert_ex.setPositiveButton("예", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                finish();
+            }
+        });
+        AlertDialog alert = alert_ex.create();
+        alert.show();
+    }
 
 
 

@@ -32,7 +32,7 @@
                 android:layout_height="144dp"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="109dp"
+                android:layout_marginTop="156dp"
                 app:srcCompat="@drawable/main_icon" />
 
             <TextView
@@ -42,7 +42,7 @@
                 android:layout_centerInParent="true"
                 android:text=" 걱정하지마세요"
                 android:textColor="#FFFFFF"
-                android:textSize="20dp" />
+                android:textSize="22dp" />
 
             <TextView
                 android:id="@+id/textView8"
@@ -53,7 +53,7 @@
                 android:layout_marginBottom="70dp"
                 android:text=" #보호대상자용"
                 android:textColor="#FFFFFF"
-                android:textSize="18dp"
+                android:textSize="20dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -64,7 +64,7 @@
                 android:layout_centerHorizontal="true"
                 android:text=" 헬프투유"
                 android:textColor="#FFFFFF"
-                android:textSize="25dp"
+                android:textSize="26dp"
                 android:textStyle="bold" />
         </RelativeLayout>
     </FrameLayout>
