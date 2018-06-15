@@ -9,6 +9,8 @@ import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.content.Intent;
@@ -29,10 +32,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -51,6 +56,7 @@ public class dataActivity extends AppCompatActivity {
     private String nickName;
     private String tempString,phoneNo;
     private int cnt;
+    public String address;
     /**
      BluetoothDevice 로 기기의 장치정보를 알아낼 수 있는 자세한 메소드 및 상태값을 알아낼 수 있다.
      연결하고자 하는 다른 블루투스 기기의 이름, 주소, 연결 상태 등의 정보를 조회할 수 있는 클래스.
@@ -86,9 +92,17 @@ private Button btnShowLocation;
     private boolean isAccessCoarseLocation = false;
     private boolean isPermission = false;
 
+    private  String addressTemp;
     // GPSTracker class
     private GpsInfo gps;
-
+//========================================================================
+public List emailList;
+    public List nickList;
+    public List codeList;
+    public int[] heartData;
+    private int num;
+    private double average;
+    //=======================================================================
 
 
     @Override
@@ -105,17 +119,50 @@ private Button btnShowLocation;
         name = intent.getStringExtra("name");
         checkCode(dataCode);
         mEditReceive = (EditText)findViewById(R.id.receiveString);
-
+        num=0;
         // 블루투스 활성화 시키는 메소드
         Intent intent2=new Intent();
         intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
+        emailList=new ArrayList();
+        nickList=new ArrayList();
+        codeList=new ArrayList();
+        heartData=new int[1000];
+        copyFirebase();
         checkBluetooth();
 
 
 
     }
+
+
+    public void copyFirebase()
+    {
+        emailList.clear();
+        nickList.clear();
+        codeList.clear();
+        testFirebase.child("User").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("@@@@@@@@", "!!!");
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    if (snapshot.child("이메일").getValue() == null)
+                        break;
+                    emailList.add(snapshot.child("이메일").getValue().toString());
+                    if (snapshot.child("닉네임").getValue() == null)
+                        break;
+                    nickList.add(snapshot.child("닉네임").getValue().toString());
+                    if (snapshot.child("회원 코드").getValue() == null)
+                        break;
+                    codeList.add(snapshot.child("회원 코드").getValue().toString());
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+
 
 
     // 블루투스 장치의 이름이 주어졌을때 해당 블루투스 장치 객체를 페어링 된 장치 목록에서 찾아내는 코드.
@@ -206,19 +253,7 @@ private Button btnShowLocation;
                                         @Override
                                         public void run() {
                                             // mStrDelimiter = '\n';
-                                            tempString="warning\r";
-                                            Log.d("@@@@@@@@","###");
-                                            if(data.compareTo(tempString)==0) {
-                                                phoneNo = name;
-                                                mDatabase.child("User").child(nickName).child("위급상황").setValue(data);
 
-                                                sms=help_message;
-                                                SmsManager smsManager = SmsManager.getDefault();
-                                                smsManager.sendTextMessage(name, null, sms, null, null);
-                                                Toast.makeText(getApplicationContext(), "메세지 전송이 완료되었습니다", Toast.LENGTH_LONG).show();
-                                            }
-                                            else
-                                                mDatabase.child("User").child(nickName).child("심장박동").setValue(data);
                                             gps = new GpsInfo(dataActivity.this);
                                             // GPS 사용유무 가져오기
                                             callPermission();  // 권한 요청을 해야 함
@@ -229,6 +264,12 @@ private Button btnShowLocation;
 
                                                 txtLat=Double.toString(latitude);
                                                 txtLon=Double.toString(longitude);
+
+
+
+
+
+
                                                 mDatabase.child("User").child(nickName).child("위도").setValue(txtLat);
                                                 mDatabase.child("User").child(nickName).child("경도").setValue(txtLon);
 
@@ -240,6 +281,48 @@ private Button btnShowLocation;
                                             Intent i = new Intent(dataActivity.this, GpsActivity.class);
                                             startActivity(i);
                                             */
+                                            tempString="warning\r";
+                                            Log.d("@@@@@@@@","###");
+                                            if(data.compareTo(tempString)==0) {
+                                                phoneNo = name;
+                                                mDatabase.child("User").child(nickName).child("위급상황").setValue(data);
+
+                                                final Geocoder geocoder = new Geocoder(dataActivity.this);
+                                                        List<Address> list = null;
+                                                        try {
+                                                            double d1 = Double.parseDouble(txtLat);
+                                                            double d2 = Double.parseDouble(txtLon);
+
+                                                            list = geocoder.getFromLocation(
+                                                                    d1, // 위도
+                                                                    d2, // 경도
+                                                                    10); // 얻어올 값의 개수
+                                                        } catch (IOException e) {
+                                                            e.printStackTrace();
+                                                            Log.e("test", "입출력 오류 - 서버에서 주소변환시 에러발생");
+                                                        }
+                                                        if (list != null) {
+                                                            if (list.size()==0) {
+                                                                addressTemp="없음";
+                                                            } else {
+                                                                String cut[] = list.get(0).toString().split(" ");
+                                                                addressTemp=cut[1]+cut[2]+cut[3]+cut[4];
+                                                            }
+                                                        }
+
+
+                                                sms=help_message+"\n현재 위치는 : "+addressTemp;
+                                                SmsManager smsManager = SmsManager.getDefault();
+                                                smsManager.sendTextMessage(name, null, sms, null, null);
+                                                Toast.makeText(getApplicationContext(), "메세지 전송이 완료되었습니다", Toast.LENGTH_LONG).show();
+                                            }
+                                            else {
+                                                mDatabase.child("User").child(nickName).child("심장박동").setValue(data);
+                                                mDatabase.child("User").child(nickName).child("심장박동").child(Integer.toString(num)).setValue(data);
+                                            }
+
+                                            num++;
+
                                         }
 
                                     });

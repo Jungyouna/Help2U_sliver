@@ -1,7 +1,10 @@
 package com.example.youna.mayii;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,8 +20,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class LoginActivity extends AppCompatActivity {
     private Button button5;
@@ -38,6 +43,7 @@ public class LoginActivity extends AppCompatActivity {
         codeList=new ArrayList();
         p_phoneNumber = (EditText)findViewById(R.id.p_phoneNumber);
         codeNumber = (EditText)findViewById(R.id.editText);
+
         testFirebase = FirebaseDatabase.getInstance().getReference();
         dataCnt=0;
         Log.d("으랑ㅁ니ㅏ널ㄴ미ㅏ","ㅇㅁ러ㅏㅣ파ㅣㅓㅍㄷ");
@@ -46,6 +52,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 checkCode(codeNumber.getText().toString());
+
             }
         });
     }
