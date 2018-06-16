@@ -62,7 +62,7 @@ public class SilverActivity extends AppCompatActivity {
     private ImageButton sendButton;
     private String name, phoneNo, sms;
     private String dataCode;
-
+    private String average;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +72,7 @@ public class SilverActivity extends AppCompatActivity {
         Intent intent = getIntent();
         name = intent.getStringExtra("name");
         dataCode=intent.getStringExtra("dataCode");
+        average=intent.getStringExtra("평균");
         textView3 = (TextView)findViewById(R.id.textView3);
         textView6 = (TextView)findViewById(R.id.textView6);
         sendButton=(ImageButton)findViewById(R.id.sendButton);
@@ -101,7 +102,7 @@ public class SilverActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(SilverActivity.this, dataActivity.class);
-                i.putExtra("dataCode",dataCode).putExtra("name",name);
+                i.putExtra("dataCode",dataCode).putExtra("name",name).putExtra("평균",average);
                 startActivity(i);
             }
         });

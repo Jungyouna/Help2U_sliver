@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -99,9 +100,15 @@ private Button btnShowLocation;
 public List emailList;
     public List nickList;
     public List codeList;
-    public int[] heartData;
+
     private int num;
+    private String average2;
     private double average;
+    private int i;
+    private int numb;
+    private  int sos;
+    private  String[] tempData;
+    private String[] ex;
     //=======================================================================
 
 
@@ -117,9 +124,14 @@ public List emailList;
         Intent intent = getIntent();
         dataCode=intent.getStringExtra("dataCode");
         name = intent.getStringExtra("name");
+        average2=intent.getStringExtra("평균");
+        average=Double.parseDouble(average2);
+        sos=0;
+        numb=Integer.parseInt(String.valueOf(Math.round(average)));
         checkCode(dataCode);
         mEditReceive = (EditText)findViewById(R.id.receiveString);
         num=0;
+        i=0;
         // 블루투스 활성화 시키는 메소드
         Intent intent2=new Intent();
         intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -127,7 +139,7 @@ public List emailList;
         emailList=new ArrayList();
         nickList=new ArrayList();
         codeList=new ArrayList();
-        heartData=new int[1000];
+
         copyFirebase();
         checkBluetooth();
 
@@ -141,6 +153,7 @@ public List emailList;
         emailList.clear();
         nickList.clear();
         codeList.clear();
+
         testFirebase.child("User").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -155,6 +168,11 @@ public List emailList;
                     if (snapshot.child("회원 코드").getValue() == null)
                         break;
                     codeList.add(snapshot.child("회원 코드").getValue().toString());
+
+
+
+                   // heartData[0]=snapshot.child("심장박동 데이터").getValue().toString();
+                 //   Log.d("ddddd",heartData[0]);
                 }
             }
             @Override
@@ -226,6 +244,7 @@ public List emailList;
         {
             @Override
             public void run() {
+
                 // interrupt() 메소드를 이용 스레드를 종료시키는 예제이다.
                 // interrupt() 메소드는 하던 일을 멈추는 메소드이다.
                 // isInterrupted() 메소드를 사용하여 멈추었을 경우 반복문을 나가서 스레드가 종료하게 된다.
@@ -310,19 +329,23 @@ public List emailList;
                                                             }
                                                         }
 
-
-                                                sms=help_message+"\n현재 위치는 : "+addressTemp;
-                                                SmsManager smsManager = SmsManager.getDefault();
-                                                smsManager.sendTextMessage(name, null, sms, null, null);
-                                                Toast.makeText(getApplicationContext(), "메세지 전송이 완료되었습니다", Toast.LENGTH_LONG).show();
+                                                    sos=1;
                                             }
                                             else {
                                                 mDatabase.child("User").child(nickName).child("심장박동").setValue(data);
-                                                mDatabase.child("User").child(nickName).child("심장박동").child(Integer.toString(num)).setValue(data);
+                                                String def=Integer.toString(num);
+                                                mDatabase.child("User").child(nickName).child("심장박동 데이터").child(def).setValue(data);
+                                                tempData=data.split("\r");
+                                                //ex=tempData[0].split(" ");
                                             }
-
+                                            int reserve= Integer.parseInt(tempData[0]);
+                                                if(sos==1&&numb-40<reserve) {
+                                                    sms = help_message + "\n현재 위치는 : " + addressTemp;
+                                                    SmsManager smsManager = SmsManager.getDefault();
+                                                    smsManager.sendTextMessage(name, null, sms, null, null);
+                                                    Toast.makeText(getApplicationContext(), "메세지 전송이 완료되었습니다", Toast.LENGTH_LONG).show();
+                                                }
                                             num++;
-
                                         }
 
                                     });
